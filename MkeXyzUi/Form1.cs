@@ -20,33 +20,21 @@ namespace MkeXyzUi
 
         private void calculateBtn_Click(object sender, EventArgs e)
         {
-            const string filename = "result.txt";
             try
             {
                 var (q, u) = _solution.Calculate();
-                var fileStream = new FileStream(filename, FileMode.Create);
-                using (var streamWriter = new StreamWriter(fileStream))
+                for (int i = 0; i < q.Length; ++i)
                 {
-                    streamWriter.WriteLine("q");
-                    foreach (var qVar in q)
-                    {
-                        streamWriter.WriteLine(qVar);
-                    }
-                    streamWriter.WriteLine("u");
-                    foreach (var uVar in u)
-                    {
-                        streamWriter.WriteLine(uVar);
-                    }
+                    dataTable.Rows.Add($"{q[i]}", $"{u[i]}");
                 }
-                Process.Start(filename);
             }
             catch (Exception exception)
             {
-                MessageBox.Show(this, exception.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, exception.Message, @"Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void readParamsButton_Click(object sender, EventArgs e)
         {
             _solution.SolutionParams = ReadParamsFromJson();
         }
@@ -63,6 +51,16 @@ namespace MkeXyzUi
             }
 
             return solutionParams;
+        }
+
+        private void openParamsFileMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start("SolutionParams.json");
+        }
+
+        private void exitMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
