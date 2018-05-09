@@ -7,6 +7,7 @@
 
     using System.Collections.Generic;
     using System;
+    using Mke.Helpers;
 
     /// <inheritdoc />
     internal sealed class Solution : ISolution
@@ -288,282 +289,39 @@
             var My = GetLocalM(y1, y2);
             var Mz = GetLocalM(z1, z2);
 
-            #region Матрицы жёсткости и массы
-
-            var G = new double[8, 8];
-            var M = new double[8, 8];
-
-            G[0, 0] = SolutionParams.Lambda * (Gx[0, 0] * My[0, 0] * Mz[0, 0] +
-                                               Mx[0, 0] * Gy[0, 0] * Mz[0, 0] +
-                                               Mx[0, 0] * My[0, 0] * Gz[0, 0]);
-
-            G[0, 1] = SolutionParams.Lambda * (Gx[0, 1] * My[0, 0] * Mz[0, 0] +
-                                               Mx[0, 1] * Gy[0, 0] * Mz[0, 0] +
-                                               Mx[0, 1] * My[0, 0] * Gz[0, 0]);
-
-            G[0, 2] = SolutionParams.Lambda * (Gx[0, 0] * My[0, 1] * Mz[0, 0] +
-                                               Mx[0, 0] * Gy[0, 1] * Mz[0, 0] +
-                                               Mx[0, 0] * My[0, 1] * Gz[0, 0]);
-
-            G[0, 3] = SolutionParams.Lambda * (Gx[0, 1] * My[0, 1] * Mz[0, 0] +
-                                               Mx[0, 1] * Gy[0, 1] * Mz[0, 0] +
-                                               Mx[0, 1] * My[0, 1] * Gz[0, 0]);
-
-            G[0, 4] = SolutionParams.Lambda * (Gx[0, 0] * My[0, 0] * Mz[0, 1] +
-                                               Mx[0, 0] * Gy[0, 0] * Mz[0, 1] +
-                                               Mx[0, 0] * My[0, 0] * Gz[0, 1]);
-
-            G[0, 5] = SolutionParams.Lambda * (Gx[0, 1] * My[0, 0] * Mz[0, 1] +
-                                               Mx[0, 1] * Gy[0, 0] * Mz[0, 1] +
-                                               Mx[0, 1] * My[0, 0] * Gz[0, 1]);
-
-            G[0, 6] = SolutionParams.Lambda * (Gx[0, 0] * My[0, 1] * Mz[0, 1] +
-                                               Mx[0, 0] * Gy[0, 1] * Mz[0, 1] +
-                                               Mx[0, 0] * My[0, 1] * Gz[0, 1]);
-
-            G[0, 7] = SolutionParams.Lambda * (Gx[0, 1] * My[0, 1] * Mz[0, 1] +
-                                               Mx[0, 1] * Gy[0, 1] * Mz[0, 1] +
-                                               Mx[0, 1] * My[0, 1] * Gz[0, 1]);
-
-            G[1, 0] = G[0, 1];
-
-            G[1, 1] = SolutionParams.Lambda * (Gx[1, 1] * My[0, 0] * Mz[0, 0] +
-                                               Mx[1, 1] * Gy[0, 0] * Mz[0, 0] +
-                                               Mx[1, 1] * My[0, 0] * Gz[0, 0]);
-
-            G[1, 2] = SolutionParams.Lambda * (Gx[1, 0] * My[0, 1] * Mz[0, 0] +
-                                               Mx[1, 0] * Gy[0, 1] * Mz[0, 0] +
-                                               Mx[1, 0] * My[0, 1] * Gz[0, 0]);
-
-            G[1, 3] = SolutionParams.Lambda * (Gx[1, 1] * My[0, 1] * Mz[0, 0] +
-                                               Mx[1, 1] * Gy[0, 1] * Mz[0, 0] +
-                                               Mx[1, 1] * My[0, 1] * Gz[0, 0]);
-
-            G[1, 4] = SolutionParams.Lambda * (Gx[1, 0] * My[0, 0] * Mz[0, 1] +
-                                               Mx[1, 0] * Gy[0, 0] * Mz[0, 1] +
-                                               Mx[1, 0] * My[0, 0] * Gz[0, 1]);
-
-            G[1, 5] = SolutionParams.Lambda * (Gx[1, 1] * My[0, 0] * Mz[0, 1] +
-                                               Mx[1, 1] * Gy[0, 0] * Mz[0, 1] +
-                                               Mx[1, 1] * My[0, 0] * Gz[0, 1]);
-
-            G[1, 6] = SolutionParams.Lambda * (Gx[1, 0] * My[0, 1] * Mz[0, 1] +
-                                               Mx[1, 0] * Gy[0, 1] * Mz[0, 1] +
-                                               Mx[1, 0] * My[0, 1] * Gz[0, 1]);
-
-            G[1, 7] = SolutionParams.Lambda * (Gx[1, 1] * My[0, 1] * Mz[0, 1] +
-                                               Mx[1, 1] * Gy[0, 1] * Mz[0, 1] +
-                                               Mx[1, 1] * My[0, 1] * Gz[0, 1]);
-
-            G[2, 0] = G[0, 2];
-
-            G[2, 1] = G[1, 2];
-
-            G[2, 2] = SolutionParams.Lambda * (Gx[0, 0] * My[1, 1] * Mz[0, 0] +
-                                               Mx[0, 0] * Gy[1, 1] * Mz[0, 0] +
-                                               Mx[0, 0] * My[1, 1] * Gz[0, 0]);
-
-            G[2, 3] = SolutionParams.Lambda * (Gx[0, 1] * My[1, 1] * Mz[0, 0] +
-                                               Mx[0, 1] * Gy[1, 1] * Mz[0, 0] +
-                                               Mx[0, 1] * My[1, 1] * Gz[0, 0]);
-
-            G[2, 4] = SolutionParams.Lambda * (Gx[0, 0] * My[1, 0] * Mz[0, 1] +
-                                               Mx[0, 0] * Gy[1, 0] * Mz[0, 1] +
-                                               Mx[0, 0] * My[1, 0] * Gz[0, 1]);
-
-            G[2, 5] = SolutionParams.Lambda * (Gx[0, 1] * My[1, 0] * Mz[0, 1] +
-                                               Mx[0, 1] * Gy[1, 0] * Mz[0, 1] +
-                                               Mx[0, 1] * My[1, 0] * Gz[0, 1]);
-
-            G[2, 6] = SolutionParams.Lambda * (Gx[0, 0] * My[1, 1] * Mz[0, 1] +
-                                               Mx[0, 0] * Gy[1, 1] * Mz[0, 1] +
-                                               Mx[0, 0] * My[1, 1] * Gz[0, 1]);
-
-            G[2, 7] = SolutionParams.Lambda * (Gx[0, 1] * My[1, 1] * Mz[0, 1] +
-                                               Mx[0, 1] * Gy[1, 1] * Mz[0, 1] +
-                                               Mx[0, 1] * My[1, 1] * Gz[0, 1]);
-
-            G[3, 0] = G[0, 3];
-
-            G[3, 1] = G[1, 3];
-
-            G[3, 2] = G[2, 3];
-
-            G[3, 3] = SolutionParams.Lambda * (Gx[1, 1] * My[1, 1] * Mz[0, 0] +
-                                               Mx[1, 1] * Gy[1, 1] * Mz[0, 0] +
-                                               Mx[1, 1] * My[1, 1] * Gz[0, 0]);
-
-            G[3, 4] = SolutionParams.Lambda * (Gx[1, 0] * My[1, 0] * Mz[0, 1] +
-                                               Mx[1, 0] * Gy[1, 0] * Mz[0, 1] +
-                                               Mx[1, 0] * My[1, 0] * Gz[0, 1]);
-
-            G[3, 5] = SolutionParams.Lambda * (Gx[1, 1] * My[1, 0] * Mz[0, 1] +
-                                               Mx[1, 1] * Gy[1, 0] * Mz[0, 1] +
-                                               Mx[1, 1] * My[1, 0] * Gz[0, 1]);
-
-            G[3, 6] = SolutionParams.Lambda * (Gx[1, 0] * My[1, 1] * Mz[0, 1] +
-                                               Mx[1, 0] * Gy[1, 1] * Mz[0, 1] +
-                                               Mx[1, 0] * My[1, 1] * Gz[0, 1]);
-
-            G[3, 7] = SolutionParams.Lambda * (Gx[1, 1] * My[1, 1] * Mz[0, 1] +
-                                               Mx[1, 1] * Gy[1, 1] * Mz[0, 1] +
-                                               Mx[1, 1] * My[1, 1] * Gz[0, 1]);
-
-            G[4, 0] = G[0, 4];
-
-            G[4, 1] = G[1, 4];
-
-            G[4, 2] = G[2, 4];
-
-            G[4, 3] = G[3, 4];
-
-            G[4, 4] = SolutionParams.Lambda * (Gx[0, 0] * My[0, 0] * Mz[1, 1] +
-                                               Mx[0, 0] * Gy[0, 0] * Mz[1, 1] +
-                                               Mx[0, 0] * My[0, 0] * Gz[1, 1]);
-
-            G[4, 5] = SolutionParams.Lambda * (Gx[0, 1] * My[0, 0] * Mz[1, 1] +
-                                               Mx[0, 1] * Gy[0, 0] * Mz[1, 1] +
-                                               Mx[0, 1] * My[0, 0] * Gz[1, 1]);
-
-            G[4, 6] = SolutionParams.Lambda * (Gx[0, 0] * My[0, 1] * Mz[1, 1] +
-                                               Mx[0, 0] * Gy[0, 1] * Mz[1, 1] +
-                                               Mx[0, 0] * My[0, 1] * Gz[1, 1]);
-
-            G[4, 7] = SolutionParams.Lambda * (Gx[0, 1] * My[0, 1] * Mz[1, 1] +
-                                               Mx[0, 1] * Gy[0, 1] * Mz[1, 1] +
-                                               Mx[0, 1] * My[0, 1] * Gz[1, 1]);
-
-            G[5, 0] = G[0, 5];
-
-            G[5, 1] = G[1, 5];
-
-            G[5, 2] = G[2, 5];
-
-            G[5, 3] = G[3, 5];
-
-            G[5, 4] = G[4, 5];
-
-            G[5, 5] = SolutionParams.Lambda * (Gx[1, 1] * My[0, 0] * Mz[1, 1] +
-                                               Mx[1, 1] * Gy[0, 0] * Mz[1, 1] +
-                                               Mx[1, 1] * My[0, 0] * Gz[1, 1]);
-
-            G[5, 6] = SolutionParams.Lambda * (Gx[1, 0] * My[0, 1] * Mz[1, 1] +
-                                               Mx[1, 0] * Gy[0, 1] * Mz[1, 1] +
-                                               Mx[1, 0] * My[0, 1] * Gz[1, 1]);
-
-            G[5, 7] = SolutionParams.Lambda * (Gx[1, 1] * My[0, 1] * Mz[1, 1] +
-                                               Mx[1, 1] * Gy[0, 1] * Mz[1, 1] +
-                                               Mx[1, 1] * My[0, 1] * Gz[1, 1]);
-
-            G[6, 0] = G[0, 6];
-
-            G[6, 1] = G[1, 6];
-
-            G[6, 2] = G[2, 6];
-
-            G[6, 3] = G[3, 6];
-
-            G[6, 4] = G[4, 6];
-
-            G[6, 5] = G[5, 6];
-
-            G[6, 6] = SolutionParams.Lambda * (Gx[0, 0] * My[1, 1] * Mz[1, 1] +
-                                               Mx[0, 0] * Gy[1, 1] * Mz[1, 1] +
-                                               Mx[0, 0] * My[1, 1] * Gz[1, 1]);
-
-            G[6, 7] = SolutionParams.Lambda * (Gx[0, 1] * My[1, 1] * Mz[1, 1] +
-                                               Mx[0, 1] * Gy[1, 1] * Mz[1, 1] +
-                                               Mx[0, 1] * My[1, 1] * Gz[1, 1]);
-
-            G[7, 0] = G[0, 7];
-
-            G[7, 1] = G[1, 7];
-
-            G[7, 2] = G[2, 7];
-
-            G[7, 3] = G[3, 7];
-
-            G[7, 4] = G[4, 7];
-
-            G[7, 5] = G[5, 7];
-
-            G[7, 6] = G[6, 7];
-
-            G[7, 7] = SolutionParams.Lambda * (Gx[1, 1] * My[1, 1] * Mz[1, 1] +
-                                               Mx[1, 1] * Gy[1, 1] * Mz[1, 1] +
-                                               Mx[1, 1] * My[1, 1] * Gz[1, 1]);
-
-            M[0, 0] = SolutionParams.Gamma * Mx[0, 0] * My[0, 0] * Mz[0, 0];
-            M[0, 1] = SolutionParams.Gamma * Mx[0, 1] * My[0, 0] * Mz[0, 0];
-            M[0, 2] = SolutionParams.Gamma * Mx[0, 0] * My[0, 1] * Mz[0, 0];
-            M[0, 3] = SolutionParams.Gamma * Mx[0, 1] * My[0, 1] * Mz[0, 0];
-            M[0, 4] = SolutionParams.Gamma * Mx[0, 0] * My[0, 0] * Mz[0, 1];
-            M[0, 5] = SolutionParams.Gamma * Mx[0, 1] * My[0, 0] * Mz[0, 1];
-            M[0, 6] = SolutionParams.Gamma * Mx[0, 0] * My[0, 1] * Mz[0, 1];
-            M[0, 7] = SolutionParams.Gamma * Mx[0, 1] * My[0, 1] * Mz[0, 1];
-
-            M[1, 0] = M[0, 1];
-            M[1, 1] = SolutionParams.Gamma * Mx[1, 0] * My[0, 0] * Mz[0, 0];
-            M[1, 2] = SolutionParams.Gamma * Mx[1, 0] * My[0, 1] * Mz[0, 0];
-            M[1, 3] = SolutionParams.Gamma * Mx[1, 1] * My[0, 1] * Mz[0, 0];
-            M[1, 4] = SolutionParams.Gamma * Mx[1, 0] * My[0, 0] * Mz[0, 1];
-            M[1, 5] = SolutionParams.Gamma * Mx[1, 1] * My[0, 0] * Mz[0, 1];
-            M[1, 6] = SolutionParams.Gamma * Mx[1, 0] * My[0, 1] * Mz[0, 1];
-            M[1, 7] = SolutionParams.Gamma * Mx[1, 1] * My[0, 1] * Mz[0, 1];
-
-            M[2, 0] = M[0, 1];
-            M[2, 1] = M[1, 2];
-            M[2, 2] = SolutionParams.Gamma * Mx[0, 0] * My[1, 1] * Mz[0, 0];
-            M[2, 3] = SolutionParams.Gamma * Mx[0, 1] * My[1, 1] * Mz[0, 0];
-            M[2, 4] = SolutionParams.Gamma * Mx[0, 0] * My[1, 0] * Mz[0, 1];
-            M[2, 5] = SolutionParams.Gamma * Mx[0, 1] * My[1, 0] * Mz[0, 1];
-            M[2, 6] = SolutionParams.Gamma * Mx[0, 0] * My[1, 1] * Mz[0, 1];
-            M[2, 7] = SolutionParams.Gamma * Mx[0, 1] * My[1, 1] * Mz[0, 1];
-
-            M[3, 0] = M[0, 3];
-            M[3, 1] = M[1, 3];
-            M[3, 2] = M[2, 3];
-            M[3, 3] = SolutionParams.Gamma * Mx[1, 1] * My[1, 1] * Mz[0, 0];
-            M[3, 4] = SolutionParams.Gamma * Mx[1, 0] * My[1, 0] * Mz[0, 1];
-            M[3, 5] = SolutionParams.Gamma * Mx[1, 1] * My[1, 0] * Mz[0, 1];
-            M[3, 6] = SolutionParams.Gamma * Mx[1, 0] * My[1, 1] * Mz[0, 1];
-            M[3, 7] = SolutionParams.Gamma * Mx[1, 1] * My[1, 1] * Mz[0, 1];
-
-            M[4, 0] = M[0, 4];
-            M[4, 1] = M[1, 4];
-            M[4, 2] = M[2, 4];
-            M[4, 3] = M[3, 4];
-            M[4, 4] = SolutionParams.Gamma * Mx[0, 0] * My[0, 0] * Mz[1, 1];
-            M[4, 5] = SolutionParams.Gamma * Mx[0, 1] * My[0, 0] * Mz[1, 1];
-            M[4, 6] = SolutionParams.Gamma * Mx[0, 0] * My[0, 1] * Mz[1, 1];
-            M[4, 7] = SolutionParams.Gamma * Mx[0, 1] * My[0, 1] * Mz[1, 1];
-
-            M[5, 0] = M[0, 5];
-            M[5, 1] = M[1, 5];
-            M[5, 2] = M[2, 5];
-            M[5, 3] = M[3, 5];
-            M[5, 4] = M[4, 5];
-            M[5, 5] = SolutionParams.Gamma * Mx[1, 1] * My[0, 0] * Mz[1, 1];
-            M[5, 6] = SolutionParams.Gamma * Mx[1, 0] * My[0, 1] * Mz[1, 1];
-            M[5, 7] = SolutionParams.Gamma * Mx[1, 1] * My[0, 1] * Mz[1, 1];
-
-            M[6, 0] = M[0, 6];
-            M[6, 1] = M[1, 6];
-            M[6, 2] = M[2, 6];
-            M[6, 3] = M[3, 6];
-            M[6, 4] = M[4, 6];
-            M[6, 5] = M[5, 6];
-            M[6, 6] = SolutionParams.Gamma * Mx[0, 0] * My[1, 1] * Mz[1, 1];
-            M[6, 7] = SolutionParams.Gamma * Mx[0, 1] * My[1, 1] * Mz[1, 1];
-
-            M[7, 0] = M[0, 7];
-            M[7, 1] = M[1, 7];
-            M[7, 2] = M[2, 7];
-            M[7, 3] = M[3, 7];
-            M[7, 4] = M[4, 7];
-            M[7, 5] = M[5, 7];
-            M[7, 6] = M[6, 7];
-            M[7, 7] = SolutionParams.Gamma * Mx[1, 1] * My[1, 1] * Mz[1, 1];
+            #region Формирование матрицы жёсткости и массы
+
+            const int nodesCount = 8;
+            var G = new double[nodesCount, nodesCount];
+            var M = new double[nodesCount, nodesCount];
+
+            for (var i = 0; i < nodesCount; i++)
+            {
+                var iBinaryArray = ToBinaryConverter.ConvertToBinary(i, 3);
+                var xi = iBinaryArray[0];
+                var yi = iBinaryArray[1];
+                var zi = iBinaryArray[2];
+
+                for (var j = i; j < nodesCount; j++)
+                {
+                    var jBinaryArray = ToBinaryConverter.ConvertToBinary(j, 3);
+                    var xj = jBinaryArray[0];
+                    var yj = jBinaryArray[1];
+                    var zj = jBinaryArray[2];
+
+                    G[i, j] = SolutionParams.Lambda * (Gx[xi, xj] * My[yi, yj] * Mz[zi, zj] +
+                                                       Mx[xi, xj] * Gy[yi, yj] * Mz[zi, zj] +
+                                                       Mx[xi, xj] * My[yi, yj] * Gz[zi, zj]);
+
+                    M[i, j] = SolutionParams.Gamma * Mx[xi, xj] * My[yi, yj] * Mz[zi, zj];
+                }
+
+                for (var j = 0; j < i; j++)
+                {
+                    G[i, j] = G[j, i];
+                    M[i, j] = M[j, i];
+                }
+            }
 
             #endregion
 
