@@ -45,138 +45,22 @@
             #region Краевые
 
             //нижняя граница
-            var startNode = 0;
-            var endNode = x.Length * y.Length - 1;
-            var delta = 1;
-
-            for (int i = startNode; i < endNode; i += delta)
-            {
-                if (SolutionParams.BottomSecond && (i + 1) % x.Length != 0)
-                {
-                    kuslau2(slae, (i, i + 1, i + x.Length, i + x.Length + 1), EEdge.Bottom);
-                }
-
-                if (SolutionParams.BottomThird && (i + 1) % x.Length != 0)
-                {
-                    kuslau3(slae, (i, i + 1, i + x.Length, i + x.Length + 1), EEdge.Bottom);
-                }
-
-                if (SolutionParams.BottomFirst)
-                {
-                    kuslau1(slae, i);
-                }
-            }
+            CalculateKU(EEdge.Bottom, slae);
 
             //верхняя граница
-            startNode = x.Length * y.Length * z.Length - x.Length * y.Length;
-            endNode = x.Length * y.Length * z.Length - 1;
-
-            for (int i = startNode; i < endNode; i += delta)
-            {
-                if (SolutionParams.TopSecond && (i + 1) % x.Length != 0)
-                {
-                    kuslau2(slae, (i, i + 1, i + x.Length, i + x.Length + 1), EEdge.Top);
-                }
-
-                if (SolutionParams.TopThird && (i + 1) % x.Length != 0)
-                {
-                    kuslau3(slae, (i, i + 1, i + x.Length, i + x.Length + 1), EEdge.Top);
-                }
-
-                if (SolutionParams.TopFirst)
-                {
-                    kuslau1(slae, i);
-                }
-            }
+            CalculateKU(EEdge.Top, slae);
 
             //левая граница
-            startNode = 0;
-            endNode = x.Length * y.Length * z.Length - x.Length;
-            delta = x.Length;
-
-            for (int i = startNode; i < endNode; i += delta)
-            {
-                if (SolutionParams.LeftSecond)
-                {
-                    kuslau2(slae, (i, i + x.Length, i + x.Length * y.Length, i + x.Length * y.Length + x.Length), EEdge.Left);
-                }
-
-                if (SolutionParams.LeftThird)
-                {
-                    kuslau3(slae, (i, i + x.Length, i + x.Length * y.Length, i + x.Length * y.Length + x.Length), EEdge.Left);
-                }
-
-                if (SolutionParams.LeftFirst)
-                {
-                    kuslau1(slae, i);
-                }
-            }
+            CalculateKU(EEdge.Left, slae);
 
             //правая граница
-            startNode = x.Length - 1;
-            endNode = x.Length * y.Length * z.Length;
-
-            for (int i = startNode; i < endNode; i += delta)
-            {
-                if (SolutionParams.RightSecond)
-                {
-                    kuslau2(slae, (i, i + x.Length, i + x.Length * y.Length, i + x.Length * y.Length + x.Length), EEdge.Right);
-                }
-
-                if (SolutionParams.RightThird)
-                {
-                    kuslau3(slae, (i, i + x.Length, i + x.Length * y.Length, i + x.Length * y.Length + x.Length), EEdge.Right);
-                }
-
-                if (SolutionParams.RightFirst)
-                {
-                    kuslau1(slae, i);
-                }
-            }
+            CalculateKU(EEdge.Right, slae);
 
             //задняя граница
-            startNode = x.Length - 1;
-            endNode = x.Length * y.Length * z.Length;
-
-            for (int i = startNode; i < endNode; i += delta)
-            {
-                if (SolutionParams.BackSecond)
-                {
-                    kuslau2(slae, (i, i + x.Length, i + x.Length * y.Length, i + x.Length * y.Length + x.Length), EEdge.Back);
-                }
-
-                if (SolutionParams.BackThird)
-                {
-                    kuslau3(slae, (i, i + x.Length, i + x.Length * y.Length, i + x.Length * y.Length + x.Length), EEdge.Back);
-                }
-
-                if (SolutionParams.BackFirst)
-                {
-                    kuslau1(slae, i);
-                }
-            }
+            CalculateKU(EEdge.Back, slae);
 
             //передняя граница
-            startNode = x.Length - 1;
-            endNode = x.Length * y.Length * z.Length;
-
-            for (int i = startNode; i < endNode; i += delta)
-            {
-                if (SolutionParams.FrontSecond)
-                {
-                    kuslau2(slae, (i, i + x.Length, i + x.Length * y.Length, i + x.Length * y.Length + x.Length), EEdge.Front);
-                }
-
-                if (SolutionParams.FrontThird)
-                {
-                    kuslau3(slae, (i, i + x.Length, i + x.Length * y.Length, i + x.Length * y.Length + x.Length), EEdge.Front);
-                }
-
-                if (SolutionParams.FrontFirst)
-                {
-                    kuslau1(slae, i);
-                }
-            }
+            CalculateKU(EEdge.Front, slae);
 
             #endregion
 
@@ -198,7 +82,253 @@
             return (slae.q, u);
         }
 
-        private SlaeService GeneratePortrait()
+        private void CalculateKU(EEdge edge, ISlaeService slae)
+        {
+            var startNode = GetStartNode(edge);
+            var endNode = GetEndNode(edge);
+
+            bool isFirst;
+            bool isSecond;
+            bool isThird;
+
+            switch (edge)
+            {
+                case EEdge.Bottom:
+                    isFirst = SolutionParams.BottomFirst;
+                    isSecond = SolutionParams.BottomSecond;
+                    isThird = SolutionParams.BottomThird;
+                    break;
+                case EEdge.Top:
+                    isFirst = SolutionParams.TopFirst;
+                    isSecond = SolutionParams.TopSecond;
+                    isThird = SolutionParams.TopThird;
+                    break;
+                case EEdge.Left:
+                    isFirst = SolutionParams.LeftFirst;
+                    isSecond = SolutionParams.LeftSecond;
+                    isThird = SolutionParams.LeftThird;
+                    break;
+                case EEdge.Right:
+                    isFirst = SolutionParams.RightFirst;
+                    isSecond = SolutionParams.RightSecond;
+                    isThird = SolutionParams.RightThird;
+                    break;
+                case EEdge.Front:
+                    isFirst = SolutionParams.FrontFirst;
+                    isSecond = SolutionParams.FrontSecond;
+                    isThird = SolutionParams.FrontThird;
+                    break;
+                case EEdge.Back:
+                    isFirst = SolutionParams.BackFirst;
+                    isSecond = SolutionParams.BackSecond;
+                    isThird = SolutionParams.BackThird;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(edge), edge, null);
+            }
+
+            if (!isFirst && !isSecond && !isThird)
+            {
+                return;
+            }
+
+            for (var i = startNode; i <= endNode; i = GetNextNode(i, edge))
+            {
+                if (IsNodeForNative(i, edge))
+                {
+                    var nodes = GetElementNodes(i, edge);
+
+                    if (isSecond)
+                    {
+                        kuslau2(slae, nodes, edge);
+                    }
+
+                    if (isThird)
+                    {
+                        kuslau3(slae, nodes, edge);
+                    }
+                }
+
+                if (isFirst)
+                {
+                    kuslau1(slae, i);
+                }
+            }
+        }
+
+        private bool IsNodeForNative(int node, EEdge edge)
+        {
+            var x = SolutionParams.x;
+            var y = SolutionParams.y;
+            var z = SolutionParams.z;
+
+            switch (edge)
+            {
+                case EEdge.Bottom:
+                    if (node >= x.Length * y.Length - x.Length)
+                    {
+                        return false;
+                    }
+                    if ((node + 1) % x.Length == 0)
+                    {
+                        return false;
+                    }
+                    break;
+                case EEdge.Top:
+                    if (node >= x.Length * y.Length * z.Length - x.Length)
+                    {
+                        return false;
+                    }
+                    if ((node + 1) % x.Length == 0)
+                    {
+                        return false;
+                    }
+                    break;
+                case EEdge.Left:
+                    if (node % x.Length == 0 && node >= x.Length * y.Length * (z.Length - 1))
+                    {
+                        return false;
+                    }
+                    if ((node + x.Length) % (x.Length * y.Length) == 0)
+                    {
+                        return false;
+                    }
+                    break;
+                case EEdge.Right:
+                    if ((node + 1) % x.Length == 0 && node >= x.Length * y.Length * (z.Length - 1))
+                    {
+                        return false;
+                    }
+                    if ((node + 1) % (x.Length * y.Length) == 0)
+                    {
+                        return false;
+                    }
+                    break;
+                case EEdge.Front:
+                    if (node >= x.Length * y.Length * (z.Length - 1))
+                    {
+                        return false;
+                    }
+                    if ((node + x.Length * y.Length - x.Length + 1) % (x.Length * y.Length) == 0)
+                    {
+                        return false;
+                    }
+                    break;
+                case EEdge.Back:
+                    if (node >= x.Length * y.Length * z.Length - x.Length)
+                    {
+                        return false;
+                    }
+                    if ((node + 1) % (x.Length * y.Length) == 0)
+                    {
+                        return false;
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(edge), edge, null);
+            }
+
+            return true;
+        }
+
+        private (int, int, int, int) GetElementNodes(int startNode, EEdge edge)
+        {
+            var x = SolutionParams.x;
+            var y = SolutionParams.y;
+
+            switch (edge)
+            {
+                case EEdge.Bottom:
+                case EEdge.Top:
+                    return (startNode, startNode + 1, startNode + x.Length, startNode + x.Length + 1);
+                case EEdge.Left:
+                case EEdge.Right:
+                    return (startNode, startNode + x.Length, startNode + x.Length * y.Length, startNode + x.Length * y.Length + x.Length);
+                case EEdge.Front:
+                case EEdge.Back:
+                    return (startNode, startNode + 1, startNode + x.Length * y.Length, startNode + x.Length * y.Length + 1);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(edge), edge, null);
+            }
+        }
+
+        private int GetStartNode(EEdge edge)
+        {
+            var x = SolutionParams.x;
+            var y = SolutionParams.y;
+            var z = SolutionParams.z;
+
+            switch (edge)
+            {
+                case EEdge.Bottom:
+                    return 0;
+                case EEdge.Top:
+                    return x.Length * y.Length * z.Length - x.Length * y.Length;
+                case EEdge.Left:
+                    return 0;
+                case EEdge.Right:
+                    return x.Length - 1;
+                case EEdge.Front:
+                    return 0;
+                case EEdge.Back:
+                    return x.Length * y.Length - x.Length;
+                default:
+                    throw new ArgumentException();
+            }
+        }
+
+        private int GetEndNode(EEdge edge)
+        {
+            var x = SolutionParams.x;
+            var y = SolutionParams.y;
+            var z = SolutionParams.z;
+
+            switch (edge)
+            {
+                case EEdge.Bottom:
+                    return x.Length * y.Length - 1;
+                case EEdge.Top:
+                    return x.Length * y.Length * z.Length - 1;
+                case EEdge.Left:
+                    return x.Length * y.Length * z.Length - x.Length;
+                case EEdge.Right:
+                    return x.Length * y.Length * z.Length - 1;
+                case EEdge.Front:
+                    return x.Length * y.Length * z.Length - x.Length * y.Length + x.Length - 1;
+                case EEdge.Back:
+                    return x.Length * y.Length * z.Length - 1;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(edge), edge, null);
+            }
+        }
+
+        private int GetNextNode(int node, EEdge edge)
+        {
+            var x = SolutionParams.x;
+            var y = SolutionParams.y;
+
+            switch (edge)
+            {
+                case EEdge.Bottom:
+                case EEdge.Top:
+                    return ++node;
+                case EEdge.Left:
+                case EEdge.Right:
+                    return node + x.Length;
+                case EEdge.Front:
+                case EEdge.Back:
+                    if (++node % (x.Length * y.Length) == 0)
+                    {
+                        return node + x.Length * y.Length - x.Length;
+                    }
+
+                    return node;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(edge), edge, null);
+            }
+        }
+
+        private ISlaeService GeneratePortrait()
         {
             var x = SolutionParams.x;
             var y = SolutionParams.y;
@@ -467,7 +597,7 @@
 
             var (x1, y1, z1) = GetNodeCoordinates(node);
 
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < n; i++)
             {
                 slae.GetElementOfA(node, i) = i == node ? 1 : 0;
             }
@@ -486,8 +616,8 @@
             var teta3 = teta(x3, y3, z3, edge);
             var teta4 = teta(x4, y4, z4, edge);
 
-            double h1 = 0;
-            double h2 = 0;
+            double h1;
+            double h2;
 
             switch (edge)
             {

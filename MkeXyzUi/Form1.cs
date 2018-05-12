@@ -22,6 +22,7 @@ namespace MkeXyzUi
         {
             try
             {
+                dataTable.Rows.Clear();
                 var (q, u) = _solution.Calculate();
                 for (int i = 0; i < q.Length; ++i)
                 {
