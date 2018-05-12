@@ -1,8 +1,8 @@
-﻿namespace Mke.Services
+﻿namespace Mke.Helpers
 {
     using System;
 
-    public static class MathOperationService
+    public static class MathOperations
     {
         /// <summary>Поменять местами значения двух целых чисел</summary>
         public static void Swap(ref int a, ref int b)
@@ -19,7 +19,7 @@
             a = b;
             b = temp;
         }
-        
+
         /// <summary>Скалярное произведние двух векторов</summary>
         /// <returns>Результат произведения</returns>
         /// <exception cref="ArgumentException">Исключение при разных размерах векторов</exception>
@@ -30,15 +30,15 @@
             {
                 throw new ArgumentException("Arrays sizes not equal");
             }
-            
+
             for (int i = 0; i < a.Length; i++)
             {
                 result += a[i] * b[i];
             }
-            
+
             return result;
         }
-        
+
         /// <summary>Произведение матрицы на вектор</summary>
         /// <param name="matrix">Матрица</param>
         /// <param name="N">Размерность матрицы</param>

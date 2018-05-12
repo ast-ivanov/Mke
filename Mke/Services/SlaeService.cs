@@ -1,8 +1,9 @@
 ﻿namespace Mke.Services
 {
     using System;
+    using Helpers;
     using Interfaces;
-    
+
     /// <inheritdoc />
     public class SlaeService : ISlaeService
     {
@@ -13,7 +14,7 @@
         public int N { get; }
         public double[] b { get; }
         public double[] q { get; }
-        
+
         public SlaeService(int n, double[] ggl, int[] ig, int[] jg)
         {
             this.ggl = ggl;
@@ -25,7 +26,7 @@
             this.jg = jg;
             this.N = n;
         }
-        
+
         public void CalculateGauss()
         {
             int i, j, k;
@@ -48,16 +49,16 @@
                 {
                     if (Math.Abs(GetElementOfA(m, k)) > Math.Abs(max))
                     {
-                        max = GetElementOfA(m, k); 
+                        max = GetElementOfA(m, k);
                         imax = m;
                     }
                 }
                 if (max == 0) throw new DivideByZeroException();
-                
+
                 for (i = 0; i < N; i++)
                 {
-                    str = GetElementOfA(k, i); 
-                    GetElementOfA(k, i) = GetElementOfA(imax, i); 
+                    str = GetElementOfA(k, i);
+                    GetElementOfA(k, i) = GetElementOfA(imax, i);
                     GetElementOfA(imax, i) = str;
                 }
                 d = RightPart[k]; RightPart[k] = RightPart[imax]; RightPart[imax] = d;
@@ -87,7 +88,7 @@
         {
             var L = new double[N, N];
             var U = new double[N, N];
-            
+
             if (withFactorization)
             {
                 LU_Factorization(L, U);
@@ -129,7 +130,7 @@
             {
                 q[i] = 0;
             }
-            var r = MathOperationService.MatrixMult(GetElementOfA, N, q);
+            var r = MathOperations.MatrixMult(GetElementOfA, N, q);
 
             for (var i = 0; i < N; i++)
             {
@@ -138,33 +139,33 @@
 
             var z = new double[N];
             r.CopyTo(z, 0);
-            var p = MathOperationService.MatrixMult(GetElementOfA, N, z);
+            var p = MathOperations.MatrixMult(GetElementOfA, N, z);
 
             do
             {
                 ++iterationCount;
-                alpha = MathOperationService.ScalarMult(p, r) / MathOperationService.ScalarMult(p, p);
+                alpha = MathOperations.ScalarMult(p, r) / MathOperations.ScalarMult(p, p);
                 // nev = MathOperations.ScalarMult(r, r) - alpha * alpha * MathOperations.ScalarMult(p, p);
                 for (var i = 0; i < N; i++)
                 {
                     q[i] = q[i] + alpha * z[i];
                     r[i] = r[i] - alpha * p[i];
                 }
-                var Ar = MathOperationService.MatrixMult(GetElementOfA, N, r);
-                beta = - MathOperationService.ScalarMult(p, Ar) / MathOperationService.ScalarMult(p, p);
-                
+                var Ar = MathOperations.MatrixMult(GetElementOfA, N, r);
+                beta = - MathOperations.ScalarMult(p, Ar) / MathOperations.ScalarMult(p, p);
+
                 for (var i = 0; i < N; i++)
                 {
                     z[i] = r[i] + beta * z[i];
                     p[i] = Ar[i] + beta * p[i];
                 }
 
-                discrepancy = MathOperationService.ScalarMult(r, r);
+                discrepancy = MathOperations.ScalarMult(r, r);
                 Console.WriteLine(discrepancy);
-            } 
+            }
             while (iterationCount < maxiter && discrepancy > eps);
         }
-        
+
         public ref double GetElementOfA(int i, int j)
         {
             if (i == j)
@@ -172,7 +173,7 @@
             var gguflag = false;
             if (i < j)
             {
-                MathOperationService.Swap(ref i, ref j);
+                MathOperations.Swap(ref i, ref j);
                 gguflag = true;
             }
             j--;
@@ -189,12 +190,12 @@
 
             return ref zero;
         }
-        
+
         public double[] test_vector(double[] vector)
         {
-            return MathOperationService.MatrixMult(GetElementOfA, N, vector);
+            return MathOperations.MatrixMult(GetElementOfA, N, vector);
         }
-        
+
         private void LU_Factorization(double[,] L, double[,] U)
         {
             for (int i = 0; i < N; ++i)
@@ -208,7 +209,7 @@
                     }
                     U[i, j] = GetElementOfA(i, j) - sum;
                 }
-                
+
                 for (int j = i + 1; j < N; j++)
                 {
                     double sum = 0;
