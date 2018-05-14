@@ -317,7 +317,7 @@
                     return node + x.Length;
                 case EEdge.Front:
                 case EEdge.Back:
-                    if (++node % (x.Length * y.Length) == 0)
+                    if (++node % x.Length == 0)
                     {
                         return node + x.Length * y.Length - x.Length;
                     }
@@ -509,80 +509,136 @@
         private double f(double x, double y, double z)
         {
             var gamma = SolutionParams.Gamma;
+            var lambda = SolutionParams.Lambda;
 
-            //1-st case
-            //return -gamma / r * (1 + z) + gamma * U(r, z);
-
-            //2-nd case
-            return gamma * z;
-
-            //3-rd case
-            //return gamma * (x + y + z);
-
-            //4-th case
-            //return gamma * x * y * z;
+            switch (SolutionParams.FunctionNumber)
+            {
+                case 1:
+                    return gamma * z;
+                case 2:
+                    return gamma * x * y * z;
+                case 3:
+                    return gamma * (x + y + z);
+                case 4:
+                    return -4 * lambda + gamma * (Math.Pow(x, 2) + Math.Pow(y, 2));
+                default:
+                    throw new ArgumentException("Неверно задан номер выражения");
+            }
         }
 
         private double U(double x, double y, double z)
         {
-            //1-st case
-            //return x + y + z + x * y + x * z + y * z + x * y * z + 1;
-
-            //2-nd case
-            return z;
-
-            //3-rd case
-            //return x * y * z;
-
-            //4-th case
-            //return gamma * (x + y + z);
+            switch (SolutionParams.FunctionNumber)
+            {
+                case 1:
+                    return z;
+                case 2:
+                    return x * y * z;
+                case 3:
+                    return x + y + z;
+                case 4:
+                    return Math.Pow(x, 2) + Math.Pow(y, 2);
+                default:
+                    throw new ArgumentException("Неверно задан номер выражения");
+            }
         }
 
         private double teta(double x, double y, double z, EEdge edge)
         {
             var lambda = SolutionParams.Lambda;
+            var funcNum = SolutionParams.FunctionNumber;
 
             switch (edge)
             {
-                case EEdge.Right:
-                    //1-st case
-                    //return lambda * (1 + z);
-
-                    //2-nd case
-                    return 0;
-
-                //3-rd case
-                //return lambda * 1;
+                case EEdge.Bottom:
+                    switch (funcNum)
+                    {
+                        case 1:
+                            return -lambda;
+                        case 2:
+                            return -lambda * x * y;
+                        case 3:
+                            return -lambda;
+                        case 4:
+                            return 0;
+                        default:
+                            throw new ArgumentException("Неверно задан номер выражения");
+                    }
 
                 case EEdge.Top:
-                    //1-st case
-                    //return lambda * (1 + r);
-
-                    //2-nd case
-                    return lambda * 1;
-
-                //3-rd case
-                //return 0;
+                    switch (funcNum)
+                    {
+                        case 1:
+                            return lambda;
+                        case 2:
+                            return lambda * x * y;
+                        case 3:
+                            return lambda;
+                        case 4:
+                            return 0;
+                        default:
+                            throw new ArgumentException("Неверно задан номер выражения");
+                    }
 
                 case EEdge.Left:
-                    //1-st case
-                    //return -lambda * (1 + z);
+                    switch (funcNum)
+                    {
+                        case 1:
+                            return 0;
+                        case 2:
+                            return -lambda * y * z;
+                        case 3:
+                            return -lambda;
+                        case 4:
+                            return -2 * x * lambda;
+                        default:
+                            throw new ArgumentException("Неверно задан номер выражения");
+                    }
 
-                    //2-nd case
-                    return 0;
+                case EEdge.Right:
+                    switch (funcNum)
+                    {
+                        case 1:
+                            return 0;
+                        case 2:
+                            return lambda * y * z;
+                        case 3:
+                            return lambda;
+                        case 4:
+                            return 2 * x * lambda;
+                        default:
+                            throw new ArgumentException("Неверно задан номер выражения");
+                    }
 
-                //3-rd case
-                //return -lambda * 1;
+                case EEdge.Front:
+                    switch (funcNum)
+                    {
+                        case 1:
+                            return 0;
+                        case 2:
+                            return -lambda * x * z;
+                        case 3:
+                            return -lambda;
+                        case 4:
+                            return -2 * y * lambda;
+                        default:
+                            throw new ArgumentException("Неверно задан номер выражения");
+                    }
 
-                case EEdge.Bottom:
-                    //1-st case
-                    //return -lambda * (1 + r);
-
-                    //2-nd case
-                    return -lambda * 1;
-
-                //3-rd case
-                //return 0;
+                case EEdge.Back:
+                    switch (funcNum)
+                    {
+                        case 1:
+                            return 0;
+                        case 2:
+                            return lambda * x * z;
+                        case 3:
+                            return lambda;
+                        case 4:
+                            return 2 * y * lambda;
+                        default:
+                            throw new ArgumentException("Неверно задан номер выражения");
+                    }
 
                 default:
                     throw new ArgumentException();
@@ -645,11 +701,10 @@
                 throw new Exception();
             }
 
-            var Mz = GetLocalM(z1, z2);
-            slae.b[nodes.Item1] += h1 * (M2x[0, 0] * teta1 + M2x[0, 1] * teta2 + M2x[0, 2] * teta3 + M2x[0, 3] * teta4);
-            slae.b[nodes.Item2] += h1 * (M2x[1, 0] * teta1 + M2x[1, 1] * teta2 + M2x[1, 2] * teta3 + M2x[1, 3] * teta4);
-            slae.b[nodes.Item3] += h1 * (M2x[2, 0] * teta1 + M2x[2, 1] * teta2 + M2x[2, 2] * teta3 + M2x[2, 3] * teta4);
-            slae.b[nodes.Item4] += h1 * (M2x[3, 0] * teta1 + M2x[3, 1] * teta2 + M2x[3, 2] * teta3 + M2x[3, 3] * teta4);
+            slae.b[nodes.Item1] += h1 * h2 * (M2x[0, 0] * teta1 + M2x[0, 1] * teta2 + M2x[0, 2] * teta3 + M2x[0, 3] * teta4) / 36;
+            slae.b[nodes.Item2] += h1 * h2 * (M2x[1, 0] * teta1 + M2x[1, 1] * teta2 + M2x[1, 2] * teta3 + M2x[1, 3] * teta4) / 36;
+            slae.b[nodes.Item3] += h1 * h2 * (M2x[2, 0] * teta1 + M2x[2, 1] * teta2 + M2x[2, 2] * teta3 + M2x[2, 3] * teta4) / 36;
+            slae.b[nodes.Item4] += h1 * h2 * (M2x[3, 0] * teta1 + M2x[3, 1] * teta2 + M2x[3, 2] * teta3 + M2x[3, 3] * teta4) / 36;
         }
 
         private void kuslau3(ISlaeService slae, (int, int, int, int) nodes, EEdge edge)
@@ -693,27 +748,27 @@
                 throw new Exception();
             }
 
-            slae.GetElementOfA(nodes.Item1, nodes.Item1) += SolutionParams.Beta * M2x[0, 0] * h1 * h2;
-            slae.GetElementOfA(nodes.Item1, nodes.Item2) += SolutionParams.Beta * M2x[0, 1] * h1 * h2;
-            slae.GetElementOfA(nodes.Item1, nodes.Item3) += SolutionParams.Beta * M2x[0, 2] * h1 * h2;
-            slae.GetElementOfA(nodes.Item1, nodes.Item4) += SolutionParams.Beta * M2x[0, 3] * h1 * h2;
-            slae.GetElementOfA(nodes.Item2, nodes.Item1) += SolutionParams.Beta * M2x[1, 0] * h1 * h2;
-            slae.GetElementOfA(nodes.Item2, nodes.Item2) += SolutionParams.Beta * M2x[1, 1] * h1 * h2;
-            slae.GetElementOfA(nodes.Item2, nodes.Item3) += SolutionParams.Beta * M2x[1, 2] * h1 * h2;
-            slae.GetElementOfA(nodes.Item2, nodes.Item4) += SolutionParams.Beta * M2x[1, 3] * h1 * h2;
-            slae.GetElementOfA(nodes.Item3, nodes.Item1) += SolutionParams.Beta * M2x[2, 0] * h1 * h2;
-            slae.GetElementOfA(nodes.Item3, nodes.Item2) += SolutionParams.Beta * M2x[2, 1] * h1 * h2;
-            slae.GetElementOfA(nodes.Item3, nodes.Item3) += SolutionParams.Beta * M2x[2, 2] * h1 * h2;
-            slae.GetElementOfA(nodes.Item3, nodes.Item4) += SolutionParams.Beta * M2x[2, 3] * h1 * h2;
-            slae.GetElementOfA(nodes.Item4, nodes.Item1) += SolutionParams.Beta * M2x[3, 0] * h1 * h2;
-            slae.GetElementOfA(nodes.Item4, nodes.Item2) += SolutionParams.Beta * M2x[3, 1] * h1 * h2;
-            slae.GetElementOfA(nodes.Item4, nodes.Item3) += SolutionParams.Beta * M2x[3, 2] * h1 * h2;
-            slae.GetElementOfA(nodes.Item4, nodes.Item4) += SolutionParams.Beta * M2x[3, 3] * h1 * h2;
+            slae.GetElementOfA(nodes.Item1, nodes.Item1) += SolutionParams.Beta * M2x[0, 0] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item1, nodes.Item2) += SolutionParams.Beta * M2x[0, 1] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item1, nodes.Item3) += SolutionParams.Beta * M2x[0, 2] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item1, nodes.Item4) += SolutionParams.Beta * M2x[0, 3] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item2, nodes.Item1) += SolutionParams.Beta * M2x[1, 0] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item2, nodes.Item2) += SolutionParams.Beta * M2x[1, 1] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item2, nodes.Item3) += SolutionParams.Beta * M2x[1, 2] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item2, nodes.Item4) += SolutionParams.Beta * M2x[1, 3] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item3, nodes.Item1) += SolutionParams.Beta * M2x[2, 0] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item3, nodes.Item2) += SolutionParams.Beta * M2x[2, 1] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item3, nodes.Item3) += SolutionParams.Beta * M2x[2, 2] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item3, nodes.Item4) += SolutionParams.Beta * M2x[2, 3] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item4, nodes.Item1) += SolutionParams.Beta * M2x[3, 0] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item4, nodes.Item2) += SolutionParams.Beta * M2x[3, 1] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item4, nodes.Item3) += SolutionParams.Beta * M2x[3, 2] * h1 * h2 / 36;
+            slae.GetElementOfA(nodes.Item4, nodes.Item4) += SolutionParams.Beta * M2x[3, 3] * h1 * h2 / 36;
 
-            slae.b[nodes.Item1] += h1 * (M2x[0, 0] * ubeta1 + M2x[0, 1] * ubeta2 + M2x[0, 2] * ubeta3 + M2x[0, 3] * ubeta4);
-            slae.b[nodes.Item2] += h1 * (M2x[1, 0] * ubeta1 + M2x[1, 1] * ubeta2 + M2x[1, 2] * ubeta3 + M2x[1, 3] * ubeta4);
-            slae.b[nodes.Item3] += h1 * (M2x[2, 0] * ubeta1 + M2x[2, 1] * ubeta2 + M2x[2, 2] * ubeta3 + M2x[2, 3] * ubeta4);
-            slae.b[nodes.Item4] += h1 * (M2x[3, 0] * ubeta1 + M2x[3, 1] * ubeta2 + M2x[3, 2] * ubeta3 + M2x[3, 3] * ubeta4);
+            slae.b[nodes.Item1] += (M2x[0, 0] * ubeta1 + M2x[0, 1] * ubeta2 + M2x[0, 2] * ubeta3 + M2x[0, 3] * ubeta4) * h1 * h2 / 36;
+            slae.b[nodes.Item2] += (M2x[1, 0] * ubeta1 + M2x[1, 1] * ubeta2 + M2x[1, 2] * ubeta3 + M2x[1, 3] * ubeta4) * h1 * h2 / 36;
+            slae.b[nodes.Item3] += (M2x[2, 0] * ubeta1 + M2x[2, 1] * ubeta2 + M2x[2, 2] * ubeta3 + M2x[2, 3] * ubeta4) * h1 * h2 / 36;
+            slae.b[nodes.Item4] += (M2x[3, 0] * ubeta1 + M2x[3, 1] * ubeta2 + M2x[3, 2] * ubeta3 + M2x[3, 3] * ubeta4) * h1 * h2 / 36;
         }
 
         private double[,] GetLocalM(double x1, double x2)
@@ -738,7 +793,7 @@
             };
         }
 
-        private int[,] M2x = new[,]
+        private int[,] M2x =
         {
             { 4, 2, 2, 1 },
             { 2, 4, 1, 2 },
