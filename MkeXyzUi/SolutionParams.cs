@@ -8,6 +8,9 @@
         public int N => x.Length * y.Length * z.Length;
 
         [DataMember]
+        public int FunctionNumber { get; set; }
+
+        [DataMember]
         public double Lambda { get; set; } = 1;
 
         [DataMember]
@@ -40,6 +43,7 @@
         [DataMember]
         public bool BottomSecond { get; set; }
 
+        [DataMember]
         public bool BottomThird { get; set; }
 
         [DataMember]
