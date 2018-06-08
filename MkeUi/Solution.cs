@@ -3,12 +3,12 @@
     using Mke;
     using Mke.Interfaces;
     using Mke.Services;
-    using Mke.Extensions;
 
     using System.Collections.Generic;
     using System;
+    using Mke.Helpers;
 
-    internal sealed class Solution : ISolution
+    internal sealed class Solution : ISolution<SolutionParams>
     {
         public SolutionParams SolutionParams { get; set; }
 
@@ -139,7 +139,9 @@
             var Kr = r.Length - 1;
             var Kz = z.Length - 1;
 
-            var pairs = new HashSet<Pair>();
+            var n = r.Length * z.Length;
+
+            var pairs = new SortedSet<Pair>(new PairComparer { N = n });
 
             //цикл по конечным элементам
             for (var i = 0; i < Kz; i++)
@@ -158,10 +160,9 @@
             }
 
             var bind = new List<Pair>(pairs);
-            bind.SortPairs(r.Length * z.Length);
             var ggl = new double[bind.Count];
             var jg = new int[bind.Count];
-            var ig = new int[r.Length * z.Length + 1];
+            var ig = new int[n + 1];
 
             var count = 2;
             for (var i = 0; i < bind.Count; i++)
@@ -173,9 +174,9 @@
                     ig[count++] = i;
                 }
             }
-            ig[r.Length * z.Length] = bind.Count;
+            ig[n] = bind.Count;
 
-            return new SlaeService(r.Length * z.Length, ggl, ig, jg);
+            return new SlaeService(n, ggl, ig, jg);
         }
 
         private void AddLocal(ISlaeService slae, int number)

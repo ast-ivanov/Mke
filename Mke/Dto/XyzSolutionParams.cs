@@ -1,9 +1,9 @@
-﻿namespace MkeXyzUi
+﻿namespace Mke.Dto
 {
     using System.Runtime.Serialization;
 
     [DataContract]
-    public class SolutionParams
+    public class XyzSolutionParams
     {
         public int N => x.Length * y.Length * z.Length;
 
@@ -19,11 +19,14 @@
         [DataMember]
         public double Beta { get; set; } = 1;
 
-        public double[] x { get; set; }
+        [DataMember]
+        public double[] x { get; set; } = { 1, 2, 3, 4, 5 };
 
-        public double[] y { get; set; }
+        [DataMember]
+        public double[] y { get; set; } = { 1, 2, 3, 4, 5 };
 
-        public double[] z { get; set; }
+        [DataMember]
+        public double[] z { get; set; } = { 1, 2, 3, 4, 5 };
 
         [DataMember]
         public bool TopFirst { get; set; }

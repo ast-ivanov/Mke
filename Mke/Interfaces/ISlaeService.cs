@@ -5,10 +5,10 @@
     {
         /// <summary>Размерность матрицы</summary>
         int N { get; }
-        
+
         /// <summary>Правая часть системы</summary>
         double[] b { get; }
-        
+
         /// <summary>Веса</summary>
         double[] q { get; }
 
@@ -18,6 +18,8 @@
         /// <param name="iterationCount">Количество итераций</param>
         /// <param name="discrepancy">Невязка</param>
         void CalculateLOS(int maxiter, double eps, out int iterationCount, out double discrepancy);
+
+        void CalculateMSG(int maxiter, double eps, out int iterationCount, out double discrepancy);
 
         /// <summary>Решить систему методом Гаусса</summary>
         void CalculateGauss();

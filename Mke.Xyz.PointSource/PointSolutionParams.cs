@@ -1,9 +1,9 @@
-﻿namespace MkeXyzUi
+﻿namespace Mke.Xyz.PointSource
 {
     using System.Runtime.Serialization;
 
     [DataContract]
-    public class SolutionParams
+    public class PointSolutionParams
     {
         public int N => x.Length * y.Length * z.Length;
 
@@ -11,13 +11,18 @@
         public int FunctionNumber { get; set; }
 
         [DataMember]
-        public double Lambda { get; set; } = 1;
+        public double Lambda { get; set; }
 
         [DataMember]
-        public double Gamma { get; set; } = 1;
+        public double Gamma { get; set; }
 
         [DataMember]
-        public double Beta { get; set; } = 1;
+        public double Beta { get; set; }
+
+        [DataMember]
+        public double Ro { get; set; }
+
+        public int Middle { get; set; }
 
         public double[] x { get; set; }
 

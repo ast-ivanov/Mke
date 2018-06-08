@@ -1,17 +1,17 @@
-﻿namespace MkeXyzUi
+﻿namespace Mke.Xyz.PointSource
 {
     using Mke;
-    using Mke.Interfaces;
-    using Mke.Services;
+    using Interfaces;
+    using Services;
 
     using System.Collections.Generic;
     using System;
-    using Mke.Helpers;
+    using Helpers;
 
     /// <inheritdoc />
-    internal sealed class Solution : ISolution<SolutionParams>
+    internal sealed class Solution : ISolution<PointSolutionParams>
     {
-        public SolutionParams SolutionParams { get; set; }
+        public PointSolutionParams SolutionParams { get; set; }
 
         public (double[] q, double[] U) Calculate()
         {
@@ -45,9 +45,6 @@
             int yN = y.Length / 2;
             int zN = 1;
 
-            var node = zN * x.Length * y.Length + yN * x.Length + xN;
-            slae.b[node] += 500;
-
             #region Краевые
 
             //нижняя граница
@@ -65,11 +62,18 @@
             //передняя граница
             CalculateKU(EEdge.Front, slae);
 
+            //верхняя граница
+            CalculateKU(EEdge.Top, slae);
+
             #endregion
+
+            var node = zN * x.Length * y.Length + yN * x.Length + xN;
+            slae.b[node] += SolutionParams.Ro;
 
             #region Решение СЛАУ
 
-            slae.CalculateLOS(200, 1e-10, out var iterationCount, out var discrepancy);
+            slae.CalculateLOS(200, 1e-20, out var iterationCount, out var discrepancy);
+//            slae.CalculateMSG(200, 1e-20, out var iterationCount, out var discrepancy);
 
             #endregion
 
@@ -422,121 +426,17 @@
             }
         }
 
-        private double teta(double x, double y, double z, EEdge edge)
-        {
-            var lambda = SolutionParams.Lambda;
-            var funcNum = SolutionParams.FunctionNumber;
-
-            switch (edge)
-            {
-                case EEdge.Bottom:
-                    switch (funcNum)
-                    {
-                        case 1:
-                            return -lambda;
-                        case 2:
-                            return -lambda * x * y;
-                        case 3:
-                            return -lambda;
-                        case 4:
-                            return 0;
-                        default:
-                            throw new ArgumentException("Неверно задан номер выражения");
-                    }
-
-                case EEdge.Top:
-                    switch (funcNum)
-                    {
-                        case 1:
-                            return lambda;
-                        case 2:
-                            return lambda * x * y;
-                        case 3:
-                            return lambda;
-                        case 4:
-                            return 0;
-                        default:
-                            throw new ArgumentException("Неверно задан номер выражения");
-                    }
-
-                case EEdge.Left:
-                    switch (funcNum)
-                    {
-                        case 1:
-                            return 0;
-                        case 2:
-                            return -lambda * y * z;
-                        case 3:
-                            return -lambda;
-                        case 4:
-                            return -2 * x * lambda;
-                        default:
-                            throw new ArgumentException("Неверно задан номер выражения");
-                    }
-
-                case EEdge.Right:
-                    switch (funcNum)
-                    {
-                        case 1:
-                            return 0;
-                        case 2:
-                            return lambda * y * z;
-                        case 3:
-                            return lambda;
-                        case 4:
-                            return 2 * x * lambda;
-                        default:
-                            throw new ArgumentException("Неверно задан номер выражения");
-                    }
-
-                case EEdge.Front:
-                    switch (funcNum)
-                    {
-                        case 1:
-                            return 0;
-                        case 2:
-                            return -lambda * x * z;
-                        case 3:
-                            return -lambda;
-                        case 4:
-                            return -2 * y * lambda;
-                        default:
-                            throw new ArgumentException("Неверно задан номер выражения");
-                    }
-
-                case EEdge.Back:
-                    switch (funcNum)
-                    {
-                        case 1:
-                            return 0;
-                        case 2:
-                            return lambda * x * z;
-                        case 3:
-                            return lambda;
-                        case 4:
-                            return 2 * y * lambda;
-                        default:
-                            throw new ArgumentException("Неверно задан номер выражения");
-                    }
-
-                default:
-                    throw new ArgumentException();
-            }
-        }
-
-        private double Ubeta(double x, double y, double z, EEdge edge) => U(x, y, z) + teta(x, y, z, edge) / SolutionParams.Beta;
-
         private void kuslau1(ISlaeService slae, int node)
         {
             var n = SolutionParams.N;
 
-            var (x1, y1, z1) = GetNodeCoordinates(node);
-
             for (var i = 0; i < n; i++)
             {
                 slae.GetElementOfA(node, i) = i == node ? 1 : 0;
+                slae.GetElementOfA(i, node) = i == node ? 1 : 0;
             }
-            slae.b[node] = U(x1, y1, z1);
+
+            slae.b[node] = 10;
         }
 
         private double[,] GetLocalM(double x1, double x2)
@@ -560,14 +460,6 @@
                 { -1 / h, 1 / h }
             };
         }
-
-        private int[,] M2x =
-        {
-            { 4, 2, 2, 1 },
-            { 2, 4, 1, 2 },
-            { 2, 1, 4, 2 },
-            { 1, 2, 2, 4 }
-        };
 
         private (double x, double y, double z) GetNodeCoordinates(int node)
         {

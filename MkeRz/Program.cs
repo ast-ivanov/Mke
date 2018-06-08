@@ -3,12 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    
+
     using Mke;
-    using Mke.Extensions;
+    using Mke.Helpers;
     using Mke.Interfaces;
     using Mke.Services;
-    
+
     enum Edge { Right, Top, Left, Bottom }
 
     internal class Program
@@ -21,7 +21,7 @@
         static void Main(string[] args)
         {
             var slae = GeneratePortrait();
-            
+
             #region Формирование глобальной матрицы и вектора правой части
 
             for (var i = 0; i < Kz; i++)
@@ -117,7 +117,9 @@
 
         static SlaeService GeneratePortrait()
         {
-            var pairs = new HashSet<Pair>();
+            var n = r.Length * z.Length;
+
+            var pairs = new SortedSet<Pair>(new PairComparer{N = n});
 
             //цикл по конечным элементам
             for (var i = 0; i < Kz; i++)
@@ -136,24 +138,23 @@
             }
 
             var bind = new List<Pair>(pairs);
-            bind.SortPairs(r.Length * z.Length);
             var ggl = new double[bind.Count];
             var jg = new int[bind.Count];
-            var ig = new int[r.Length * z.Length + 1];
+            var ig = new int[n + 1];
 
             var count = 2;
             for (var i = 0; i < bind.Count; i++)
             {
                 jg[i] = bind[i].Second;
-                
+
                 if (i != 0 && bind[i].First > bind[i - 1].First)
                 {
                     ig[count++] = i;
                 }
             }
-            ig[r.Length * z.Length] = bind.Count;
+            ig[n] = bind.Count;
 
-            return new SlaeService(r.Length * z.Length, ggl, ig, jg);
+            return new SlaeService(n, ggl, ig, jg);
         }
 
         static void AddLocal(ISlaeService slae, int number)

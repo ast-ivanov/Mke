@@ -28,10 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.calculateBtn = new System.Windows.Forms.Button();
             this.dataTable = new System.Windows.Forms.DataGridView();
-            this.qColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.uColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.readParamsButton = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -41,15 +45,20 @@
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.справкаToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.оПрограммеToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.qColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.uColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.diffColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.SuspendLayout();
             // 
             // calculateBtn
             // 
             this.calculateBtn.Dock = System.Windows.Forms.DockStyle.Left;
-            this.calculateBtn.Location = new System.Drawing.Point(8, 374);
+            this.calculateBtn.Location = new System.Drawing.Point(8, 702);
             this.calculateBtn.Name = "calculateBtn";
             this.calculateBtn.Size = new System.Drawing.Size(121, 51);
             this.calculateBtn.TabIndex = 0;
@@ -61,40 +70,36 @@
             // 
             this.dataTable.AllowUserToAddRows = false;
             this.dataTable.AllowUserToDeleteRows = false;
-            this.dataTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataTable.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            this.dataTable.ColumnHeadersHeight = 30;
             this.dataTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.qColumn,
-            this.uColumn});
-            this.tableLayoutPanel1.SetColumnSpan(this.dataTable, 2);
+            this.uColumn,
+            this.diffColumn});
             this.dataTable.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataTable.Location = new System.Drawing.Point(8, 33);
             this.dataTable.Name = "dataTable";
             this.dataTable.ReadOnly = true;
-            this.dataTable.Size = new System.Drawing.Size(454, 335);
+            this.dataTable.Size = new System.Drawing.Size(583, 663);
             this.dataTable.TabIndex = 2;
-            // 
-            // qColumn
-            // 
-            this.qColumn.HeaderText = "q";
-            this.qColumn.Name = "qColumn";
-            this.qColumn.ReadOnly = true;
-            this.qColumn.Width = 200;
-            // 
-            // uColumn
-            // 
-            this.uColumn.HeaderText = "U";
-            this.uColumn.Name = "uColumn";
-            this.uColumn.ReadOnly = true;
             // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
             this.tableLayoutPanel1.Controls.Add(this.readParamsButton, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.dataTable, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.calculateBtn, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.menuStrip1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.chart1, 1, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
@@ -104,13 +109,13 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(470, 433);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1484, 761);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
             // readParamsButton
             // 
             this.readParamsButton.Dock = System.Windows.Forms.DockStyle.Right;
-            this.readParamsButton.Location = new System.Drawing.Point(352, 374);
+            this.readParamsButton.Location = new System.Drawing.Point(1366, 702);
             this.readParamsButton.Name = "readParamsButton";
             this.readParamsButton.Size = new System.Drawing.Size(110, 51);
             this.readParamsButton.TabIndex = 3;
@@ -126,7 +131,7 @@
             this.справкаToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(5, 5);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(460, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1474, 24);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -173,11 +178,54 @@
             this.оПрограммеToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.оПрограммеToolStripMenuItem.Text = "О программе";
             // 
+            // qColumn
+            // 
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.qColumn.DefaultCellStyle = dataGridViewCellStyle2;
+            this.qColumn.HeaderText = "q";
+            this.qColumn.Name = "qColumn";
+            this.qColumn.ReadOnly = true;
+            this.qColumn.Width = 200;
+            // 
+            // uColumn
+            // 
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.uColumn.DefaultCellStyle = dataGridViewCellStyle3;
+            this.uColumn.HeaderText = "U";
+            this.uColumn.Name = "uColumn";
+            this.uColumn.ReadOnly = true;
+            // 
+            // diffColumn
+            // 
+            this.diffColumn.HeaderText = "Diff";
+            this.diffColumn.Name = "diffColumn";
+            this.diffColumn.ReadOnly = true;
+            this.diffColumn.Width = 150;
+            // 
+            // chart1
+            // 
+            chartArea1.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea1);
+            this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            legend1.Name = "Legend1";
+            this.chart1.Legends.Add(legend1);
+            this.chart1.Location = new System.Drawing.Point(597, 33);
+            this.chart1.Name = "chart1";
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            this.chart1.Series.Add(series1);
+            this.chart1.Size = new System.Drawing.Size(879, 663);
+            this.chart1.TabIndex = 5;
+            this.chart1.Text = "chart1";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(470, 433);
+            this.ClientSize = new System.Drawing.Size(1484, 761);
             this.Controls.Add(this.tableLayoutPanel1);
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(450, 450);
@@ -188,6 +236,7 @@
             this.tableLayoutPanel1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -197,8 +246,6 @@
         private System.Windows.Forms.Button calculateBtn;
         private System.Windows.Forms.DataGridView dataTable;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn qColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn uColumn;
         private System.Windows.Forms.Button readParamsButton;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem файлToolStripMenuItem;
@@ -207,6 +254,10 @@
         private System.Windows.Forms.ToolStripMenuItem exitMenuItem;
         private System.Windows.Forms.ToolStripMenuItem справкаToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem оПрограммеToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn qColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn uColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn diffColumn;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
     }
 }
 

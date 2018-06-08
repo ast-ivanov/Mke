@@ -1,6 +1,7 @@
 ﻿namespace Mke.Helpers
 {
     using System;
+    using System.Threading.Tasks;
 
     public static class MathOperations
     {
@@ -47,13 +48,7 @@
         public static double[] MatrixMult(ReferenceElement matrix, int N, double[] vector)
         {
             double[] result = new double[vector.Length];
-            for (int i = 0; i < N; i++)
-            {
-                for (int j = 0; j < N; j++)
-                {
-                    result[i] += matrix(i, j) * vector[j];
-                }
-            }
+            Parallel.For(0, N, i => { Parallel.For(0, N, j => { result[i] += matrix(i, j) * vector[j]; }); });
             return result;
         }
     }

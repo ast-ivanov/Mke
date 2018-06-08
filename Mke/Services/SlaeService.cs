@@ -1,6 +1,7 @@
 ﻿namespace Mke.Services
 {
     using System;
+    using System.Threading.Tasks;
     using Helpers;
     using Interfaces;
 
@@ -119,6 +120,49 @@
             }
         }
 
+        public void CalculateMSG(int maxiter, double eps, out int iterationCount, out double discrepancy)
+        {
+            double alpha;
+            double beta;
+            iterationCount = 0;
+
+            //начальное решение
+            for (var i = 0; i < N; i++)
+            {
+                q[i] = 0;
+            }
+            var r = MathOperations.MatrixMult(GetElementOfA, N, q);
+
+            for (var i = 0; i < N; i++)
+            {
+                r[i] = b[i] - r[i];
+            }
+
+            var z = new double[N];
+            r.CopyTo(z, 0);
+
+            do
+            {
+                ++iterationCount;
+                var Az = MathOperations.MatrixMult(GetElementOfA, N, z);
+                alpha = MathOperations.ScalarMult(r, r) / MathOperations.ScalarMult(Az, z);
+                var temp = MathOperations.ScalarMult(r, r);
+                Parallel.For(0, N, i =>
+                {
+                    q[i] = q[i] + alpha * z[i];
+                    r[i] = r[i] - alpha * Az[i];
+                });
+                beta = MathOperations.ScalarMult(r, r) / temp;
+                Parallel.For(0, N, i =>
+                {
+                    z[i] = r[i] + beta * z[i];
+                });
+
+                discrepancy = MathOperations.ScalarMult(r, r);
+            }
+            while (iterationCount < maxiter && discrepancy > eps);
+        }
+
         public void CalculateLOS(int maxiter, double eps, out int iterationCount, out double discrepancy)
         {
             double alpha;
@@ -146,22 +190,22 @@
                 ++iterationCount;
                 alpha = MathOperations.ScalarMult(p, r) / MathOperations.ScalarMult(p, p);
                 // nev = MathOperations.ScalarMult(r, r) - alpha * alpha * MathOperations.ScalarMult(p, p);
-                for (var i = 0; i < N; i++)
+                Parallel.For(0, N, i =>
                 {
                     q[i] = q[i] + alpha * z[i];
                     r[i] = r[i] - alpha * p[i];
-                }
+                });
+
                 var Ar = MathOperations.MatrixMult(GetElementOfA, N, r);
                 beta = - MathOperations.ScalarMult(p, Ar) / MathOperations.ScalarMult(p, p);
 
-                for (var i = 0; i < N; i++)
+                Parallel.For(0, N, i =>
                 {
                     z[i] = r[i] + beta * z[i];
                     p[i] = Ar[i] + beta * p[i];
-                }
+                });
 
                 discrepancy = MathOperations.ScalarMult(r, r);
-                Console.WriteLine(discrepancy);
             }
             while (iterationCount < maxiter && discrepancy > eps);
         }

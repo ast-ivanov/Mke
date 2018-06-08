@@ -4,10 +4,11 @@
     using System.IO;
     using System.Diagnostics;
     using System.Windows.Forms;
+    using Mke.Interfaces;
 
     public partial class Form1 : Form
     {
-        private readonly ISolution _solution;
+        private readonly ISolution<SolutionParams> _solution;
         private readonly SolutionParams _solutionParams;
 
         public Form1()

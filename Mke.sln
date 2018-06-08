@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MkeUi", "MkeUi\MkeUi.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MkeXyzUi", "MkeXyzUi\MkeXyzUi.csproj", "{A51EC1A4-C580-416A-A79D-DFB332B8C750}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mke.Xyz.PointSource", "Mke.Xyz.PointSource\Mke.Xyz.PointSource.csproj", "{C49EE28C-791D-4001-B4CC-2BD4EFEA4CEA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{A51EC1A4-C580-416A-A79D-DFB332B8C750}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A51EC1A4-C580-416A-A79D-DFB332B8C750}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A51EC1A4-C580-416A-A79D-DFB332B8C750}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C49EE28C-791D-4001-B4CC-2BD4EFEA4CEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C49EE28C-791D-4001-B4CC-2BD4EFEA4CEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C49EE28C-791D-4001-B4CC-2BD4EFEA4CEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C49EE28C-791D-4001-B4CC-2BD4EFEA4CEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
