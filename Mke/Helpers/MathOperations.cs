@@ -45,10 +45,10 @@
         /// <param name="N">Размерность матрицы</param>
         /// <param name="vector">Вектор</param>
         /// <returns>Вектор результат</returns>
-        public static double[] MatrixMult(ReferenceElement matrix, int N, double[] vector)
+        public static double[] MatrixMult(int N, double[,] A, double[] vector)
         {
             double[] result = new double[vector.Length];
-            Parallel.For(0, N, i => { Parallel.For(0, N, j => { result[i] += matrix(i, j) * vector[j]; }); });
+            Parallel.For(0, N, i => { Parallel.For(0, N, j => { result[i] += A[i, j] * vector[j]; }); });
             return result;
         }
     }
