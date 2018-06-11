@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EEdge.cs" />
+    <Compile Include="ESolutionMethod.cs" />
     <Compile Include="PointSolutionParams.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

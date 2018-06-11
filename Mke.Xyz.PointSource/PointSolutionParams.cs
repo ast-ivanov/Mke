@@ -11,6 +11,9 @@
         public int FunctionNumber { get; set; }
 
         [DataMember]
+        public ESolutionMethod SolutionMethod { get; set; }
+
+        [DataMember]
         public double Lambda { get; set; }
 
         [DataMember]

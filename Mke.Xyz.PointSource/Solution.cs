@@ -1,10 +1,8 @@
 ﻿namespace Mke.Xyz.PointSource
 {
-    using Mke;
     using Interfaces;
     using Services;
 
-    using System.Collections.Generic;
     using System;
     using Helpers;
 
@@ -23,7 +21,7 @@
             var Ky = y.Length - 1;
             var Kz = z.Length - 1;
 
-            var slae = GeneratePortrait();
+            ISlaeService slae = new SlaeService(x.Length * y.Length * z.Length);
 
             #region Формирование глобальной матрицы и вектора правой части
 
@@ -72,8 +70,24 @@
 
             #region Решение СЛАУ
 
-            slae.CalculateLOS(200, 1e-20, out var iterationCount, out var discrepancy);
-//            slae.CalculateMSG(200, 1e-20, out var iterationCount, out var discrepancy);
+            switch (SolutionParams.SolutionMethod)
+            {
+                case ESolutionMethod.LOS:
+                    slae.CalculateLOS(200, 1e-20);
+                    break;
+                case ESolutionMethod.MSG:
+                    slae.CalculateMSG(200, 1e-20);
+                    break;
+                case ESolutionMethod.LU:
+                    slae.CalculateLU(false);
+                    break;
+                case ESolutionMethod.LUWithFactorization:
+                    slae.CalculateLU(true);
+                    break;
+                case ESolutionMethod.Gauss:
+                    slae.CalculateGauss();
+                    break;
+            }
 
             #endregion
 
@@ -206,89 +220,6 @@
             }
         }
 
-        private ISlaeService GeneratePortrait()
-        {
-            var x = SolutionParams.x;
-            var y = SolutionParams.y;
-            var z = SolutionParams.z;
-
-            var xLength = x.Length;
-            var yLength = y.Length;
-            var zLength = z.Length;
-
-            var Kx = xLength - 1;
-            var Ky = yLength - 1;
-            var Kz = zLength - 1;
-
-            var n = xLength * yLength * zLength;
-
-            var pairs = new SortedSet<Pair>(
-                new PairComparer
-                {
-                    N = n
-                });
-
-            //цикл по конечным элементам
-            for (var i = 0; i < Kz; i++)
-            {
-                for (var j = 0; j < Ky; j++)
-                {
-                    for (var k = 0; k < Kx; k++)
-                    {
-                        var number = i * xLength * yLength + j * xLength + k;
-
-                        pairs.Add(new Pair(number + 1, number));
-                        pairs.Add(new Pair(number + xLength, number));
-                        pairs.Add(new Pair(number + xLength + 1, number));
-                        pairs.Add(new Pair(number + xLength * yLength, number));
-                        pairs.Add(new Pair(number + xLength * yLength + 1, number));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength, number));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength + 1, number));
-                        pairs.Add(new Pair(number + xLength, number + 1));
-                        pairs.Add(new Pair(number + xLength + 1, number + 1));
-                        pairs.Add(new Pair(number + xLength * yLength, number + 1));
-                        pairs.Add(new Pair(number + xLength * yLength + 1, number + 1));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength, number + 1));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength + 1, number + 1));
-                        pairs.Add(new Pair(number + xLength + 1, number + xLength));
-                        pairs.Add(new Pair(number + xLength * yLength, number + xLength));
-                        pairs.Add(new Pair(number + xLength * yLength + 1, number + xLength));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength, number + xLength));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength + 1, number + xLength));
-                        pairs.Add(new Pair(number + xLength * yLength, number + xLength + 1));
-                        pairs.Add(new Pair(number + xLength * yLength + 1, number + xLength + 1));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength, number + xLength + 1));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength + 1, number + xLength + 1));
-                        pairs.Add(new Pair(number + xLength * yLength + 1, number + xLength * yLength));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength, number + xLength * yLength));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength + 1, number + xLength * yLength));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength, number + xLength * yLength + 1));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength + 1, number + xLength * yLength + 1));
-                        pairs.Add(new Pair(number + xLength * yLength + xLength + 1, number + xLength * yLength + xLength));
-                    }
-                }
-            }
-
-            var bind = new List<Pair>(pairs);
-            var ggl = new double[bind.Count];
-            var jg = new int[bind.Count];
-            var ig = new int[n + 1];
-
-            var count = 2;
-            for (var i = 0; i < bind.Count; i++)
-            {
-                jg[i] = bind[i].Second;
-
-                if (i != 0 && bind[i].First > bind[i - 1].First)
-                {
-                    ig[count++] = i;
-                }
-            }
-            ig[n] = bind.Count;
-
-            return new SlaeService(n, ggl, ig, jg);
-        }
-
         private void AddLocal(ISlaeService slae, int number)
         {
             var (x1, y1, z1) = GetNodeCoordinates(number);
@@ -348,7 +279,7 @@
                 for (var j = 0; j < n; j++)
                 {
                     var column = nodesNumbers[j];
-                    slae.GetElementOfA(row, column) += G[i, j] + M[i, j];
+                    slae.A[row, column] += G[i, j] + M[i, j];
                 }
             }
 
@@ -432,11 +363,11 @@
 
             for (var i = 0; i < n; i++)
             {
-                slae.GetElementOfA(node, i) = i == node ? 1 : 0;
-                slae.GetElementOfA(i, node) = i == node ? 1 : 0;
+                slae.A[node, i] = i == node ? 1 : 0;
+                slae.A[i, node] = i == node ? 1 : 0;
             }
 
-            slae.b[node] = 10;
+            slae.b[node] = 0;
         }
 
         private double[,] GetLocalM(double x1, double x2)

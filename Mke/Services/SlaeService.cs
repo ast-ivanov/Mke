@@ -1,6 +1,7 @@
 ﻿namespace Mke.Services
 {
     using System;
+    using System.IO;
     using System.Threading.Tasks;
     using Helpers;
     using Interfaces;
@@ -8,24 +9,20 @@
     /// <inheritdoc />
     public class SlaeService : ISlaeService
     {
-        private double[] ggl, ggu, di;
-        private int[] ig, jg;
-        private double zero;
-
         public int N { get; }
+
+        public double[,] A { get; }
+
         public double[] b { get; }
+
         public double[] q { get; }
 
-        public SlaeService(int n, double[] ggl, int[] ig, int[] jg)
+        public SlaeService(int n)
         {
-            this.ggl = ggl;
-            this.ggu = new double[ggl.Length];
-            this.di = new double[n];
-            this.b = new double[n];
-            this.q = new double[n];
-            this.ig = ig;
-            this.jg = jg;
-            this.N = n;
+            A = new double[n, n];
+            b = new double[n];
+            q = new double[n];
+            N = n;
         }
 
         public void CalculateGauss()
@@ -48,9 +45,9 @@
                 max = 0;
                 for (m = k; m < N; m++)
                 {
-                    if (Math.Abs(GetElementOfA(m, k)) > Math.Abs(max))
+                    if (Math.Abs(A[m, k]) > Math.Abs(max))
                     {
-                        max = GetElementOfA(m, k);
+                        max = A[m, k];
                         imax = m;
                     }
                 }
@@ -58,30 +55,30 @@
 
                 for (i = 0; i < N; i++)
                 {
-                    str = GetElementOfA(k, i);
-                    GetElementOfA(k, i) = GetElementOfA(imax, i);
-                    GetElementOfA(imax, i) = str;
+                    str = A[k, i];
+                    A[k, i] = A[imax, i];
+                    A[imax, i] = str;
                 }
                 d = RightPart[k]; RightPart[k] = RightPart[imax]; RightPart[imax] = d;
 
                 for (i = k + 1; i < N; i++)
                 {
-                    t = GetElementOfA(i, k) / GetElementOfA(k, k);
+                    t = A[i, k] / A[k, k];
                     RightPart[i] = RightPart[i] - t * RightPart[k];
                     for (j = k + 1; j < N; j++)
                     {
-                        GetElementOfA(i, j) = GetElementOfA(i, j) - t * GetElementOfA(k, j);
+                        A[i, j] = A[i, j] - t * A[k, j];
                     }
                 }
 
             }
 
-            q[N - 1] = RightPart[N - 1] / GetElementOfA(N - 1, N - 1);
+            q[N - 1] = RightPart[N - 1] / A[N - 1, N - 1];
             for (k = N - 2; k >= 0; k--)
             {
                 sum = 0;
-                for (j = k + 1; j < N; j++) sum += GetElementOfA(k, j) * q[j];
-                q[k] = (RightPart[k] - sum) / GetElementOfA(k, k);
+                for (j = k + 1; j < N; j++) sum += A[k, j] * q[j];
+                q[k] = (RightPart[k] - sum) / A[k, k];
             }
         }
 
@@ -120,18 +117,19 @@
             }
         }
 
-        public void CalculateMSG(int maxiter, double eps, out int iterationCount, out double discrepancy)
+        public void CalculateMSG(int maxiter, double eps)
         {
             double alpha;
             double beta;
-            iterationCount = 0;
+            double discrepancy;
+            var iterationCount = 0;
 
             //начальное решение
             for (var i = 0; i < N; i++)
             {
                 q[i] = 0;
             }
-            var r = MathOperations.MatrixMult(GetElementOfA, N, q);
+            var r = MathOperations.MatrixMult(N, A, q);
 
             for (var i = 0; i < N; i++)
             {
@@ -144,7 +142,7 @@
             do
             {
                 ++iterationCount;
-                var Az = MathOperations.MatrixMult(GetElementOfA, N, z);
+                var Az = MathOperations.MatrixMult(N, A, z);
                 alpha = MathOperations.ScalarMult(r, r) / MathOperations.ScalarMult(Az, z);
                 var temp = MathOperations.ScalarMult(r, r);
                 Parallel.For(0, N, i =>
@@ -161,20 +159,26 @@
                 discrepancy = MathOperations.ScalarMult(r, r);
             }
             while (iterationCount < maxiter && discrepancy > eps);
+
+            using (var sw = new StreamWriter("msg_log.txt", true, System.Text.Encoding.Default))
+            {
+                sw.WriteLine($"Погрешность: {discrepancy}\nЧисло итераций: {iterationCount}");
+            }
         }
 
-        public void CalculateLOS(int maxiter, double eps, out int iterationCount, out double discrepancy)
+        public void CalculateLOS(int maxiter, double eps)
         {
             double alpha;
             double beta;
-            iterationCount = 0;
+            double discrepancy;
+            var iterationCount = 0;
 
             //начальное решение
             for (var i = 0; i < N; i++)
             {
                 q[i] = 0;
             }
-            var r = MathOperations.MatrixMult(GetElementOfA, N, q);
+            var r = MathOperations.MatrixMult(N, A, q);
 
             for (var i = 0; i < N; i++)
             {
@@ -183,7 +187,7 @@
 
             var z = new double[N];
             r.CopyTo(z, 0);
-            var p = MathOperations.MatrixMult(GetElementOfA, N, z);
+            var p = MathOperations.MatrixMult(N, A, z);
 
             do
             {
@@ -196,7 +200,7 @@
                     r[i] = r[i] - alpha * p[i];
                 });
 
-                var Ar = MathOperations.MatrixMult(GetElementOfA, N, r);
+                var Ar = MathOperations.MatrixMult(N, A, r);
                 beta = - MathOperations.ScalarMult(p, Ar) / MathOperations.ScalarMult(p, p);
 
                 Parallel.For(0, N, i =>
@@ -208,36 +212,11 @@
                 discrepancy = MathOperations.ScalarMult(r, r);
             }
             while (iterationCount < maxiter && discrepancy > eps);
-        }
 
-        public ref double GetElementOfA(int i, int j)
-        {
-            if (i == j)
-                return ref di[i];
-            var gguflag = false;
-            if (i < j)
+            using (var sw = new StreamWriter("los_log.txt", true, System.Text.Encoding.Default))
             {
-                MathOperations.Swap(ref i, ref j);
-                gguflag = true;
+                sw.WriteLine($"Погрешность: {discrepancy}\nЧисло итераций: {iterationCount}");
             }
-            j--;
-
-            for (var k = ig[i]; k < ig[i + 1]; k++)
-            {
-                if (jg[k] == j + 1)
-                {
-                    if (gguflag)
-                        return ref ggu[k];
-                    return ref ggl[k];
-                }
-            }
-
-            return ref zero;
-        }
-
-        public double[] test_vector(double[] vector)
-        {
-            return MathOperations.MatrixMult(GetElementOfA, N, vector);
         }
 
         private void LU_Factorization(double[,] L, double[,] U)
@@ -251,7 +230,7 @@
                     {
                         sum += L[i, k] * U[k, j];
                     }
-                    U[i, j] = GetElementOfA(i, j) - sum;
+                    U[i, j] = A[i, j] - sum;
                 }
 
                 for (int j = i + 1; j < N; j++)
@@ -261,7 +240,7 @@
                     {
                         sum += L[i, k] * U[k, j];
                     }
-                    L[j, i] = (GetElementOfA(j, i) - sum) / U[i, i];
+                    L[j, i] = (A[j, i] - sum) / U[i, i];
                 }
 
                 L[i, i] = 1;
